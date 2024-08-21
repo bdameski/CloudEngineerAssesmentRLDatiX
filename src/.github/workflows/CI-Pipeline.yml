@@ -1,0 +1,45 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker Image
+      run: |
+        docker build -t my-app .
+        
+    - name: Update README
+      run: |
+        echo "# My App" > README.md
+        echo "" >> README.md
+        echo "## How to Build and Run the Docker Image" >> README.md
+        echo "1. Build the Docker image: `docker build -t my-app .`" >> README.md
+        echo "2. Run the Docker container: `docker run -p 8080:8080 my-app`" >> README.md
+        
+    - name: Semantic Versioning
+      run: |
+        # Install a tool like `bump2version` to automate version updates
+        pip install bump2version
+        # Update the version in your application's code
+        bump2version patch
+        
+    - name: Code Analysis
+      run: |
+        # Install and run a code analysis tool of your choice
+        # For example, you can use SonarCloud
+        pip install sonar-scanner
+        sonar-scanner \
+          -Dsonar.projectKey=my-app \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
