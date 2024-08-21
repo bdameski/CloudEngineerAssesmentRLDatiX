@@ -1,0 +1,43 @@
+name: Kubernetes Deployment
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Start Minikube
+      run: |
+        minikube start
+        
+    - name: Deploy to Kubernetes
+      run: |
+        # Build and push the Docker image
+        docker build -t my-app .
+        docker push my-app:latest
+        
+        # Deploy the Helm chart
+        helm install my-app my-app
+        
+    - name: Run Tests
+      run: |
+        # Run tests against the deployed application
+        # For example, you can use tools like Postman or Curl to test the application endpoints
+        curl http://$(minikube ip):$(kubectl get service my-app -o jsonpath="{.spec.ports[0].port}")
+        
+    - name: Update README
+      run: |
+        echo "# Kubernetes Deployment" >> README.md
+        echo "" >> README.md
+        echo "This workflow creates a Minikube cluster, deploys the application using the Helm chart, and runs some tests." >> README.md
+        echo "" >> README.md
+        echo "The main steps in the workflow are:" >> README.md
+        echo "- Start Minikube" >> README.md
+        echo "- Deploy the application to Kubernetes" >> README.md
+        echo "- Run tests against the deployed application" >> README.md
